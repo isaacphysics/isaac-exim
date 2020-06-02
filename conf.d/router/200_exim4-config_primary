@@ -1,0 +1,38 @@
+
+### router/200_exim4-config_primary
+#################################
+
+# Find the section of the file for satellite smarthosts and
+# use this configuration to add additional SMTP smarthosts.
+
+.ifdef DCconfig_smarthost DCconfig_satellite
+# configtype=smarthost or configtype=satellite
+
+smarthost_mailgun:
+  debug_print = "R: smarthost_mailgun for $local_part@$domain"
+  driver = manualroute
+  domains = ! +local_domains
+  transport = remote_smtp_smarthost
+# Conditionally use this additional smarthost based on either
+#    the From address domain (${domain:$h_From:}),
+#    or the Envelope From domain ($sender_address_domain)
+# condition = ${if match_domain{${domain:$h_From:}}{mail.isaacphysics.org:mail.isaaccomputerscience.org:mail.isaacscience.org}{yes}{no}} 
+  condition = ${if match_domain{$sender_address_domain}{mail.isaacphysics.org:mail.isaaccomputerscience.org:mail.isaacscience.org}{yes}{no}} 
+  route_list = * smtp.eu.mailgun.org::587 byname
+  host_find_failed = ignore
+  same_domain_copy_routing = yes
+no_more
+
+# This is the existing, default, smarthost;
+# and will be used if additional ones don't match:
+smarthost:
+  debug_print = "R: smarthost for $local_part@$domain"
+  driver = manualroute
+  domains = ! +local_domains
+  transport = remote_smtp_smarthost
+  route_list = * DCsmarthost byname
+  host_find_failed = ignore
+  same_domain_copy_routing = yes
+  no_more
+
+.endif

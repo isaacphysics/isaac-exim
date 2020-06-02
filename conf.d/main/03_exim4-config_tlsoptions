@@ -1,0 +1,6 @@
+
+### main/03_exim4-config_tlsoptions
+
+# Add this line to the start of the file to stop advertising TLS
+# when acting as the receiving server:
+tls_advertise_hosts=
