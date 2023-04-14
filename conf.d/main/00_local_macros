@@ -15,9 +15,14 @@ DKIM_CANON = relaxed
 # Which domain to sign as:
 #     This can be any domain. Here, extract the 'from' domain out of the email
 #     using ${domain:$h_From:} to extract the domain from the From header, or
-#     uncomment to use $sender_address_domain for the Envelope-From instead.
+#     use $sender_address_domain for the Envelope-From instead.
 DKIM_DOMAIN = ${domain:$h_From:}
-#DKIM_DOMAIN = $sender_address_domain
+#    This data is currently considered 'tainted' by Exim and we must clean it.
+#    One hacky way of doing this is checking that a private key file exists
+#    for the domain in question, and then using _the name of that file_ as the
+#    domain (after replacing the -private.pem with the empty string), since that
+#    is regarded as 'untainted' data.
+DKIM_DOMAIN == ${sg{${lookup {DKIM_DOMAIN-private.pem} dsearch {/etc/exim4/dkim}}}{-private.pem}{}}
 
 # What domain 'selector' text should we use:
 #     Here, extract the selector to use from a file named using the domain name,

@@ -1,0 +1,35 @@
+# At the end of this file, replace the existing login driver and add a new one:
+
+
+# Rename the existing login driver to LOGIN_OLD remove it:
+login:
+  driver = plaintext
+  public_name = LOGIN_OLD
+.ifndef AUTH_CLIENT_ALLOW_NOTLS_PASSWORDS
+  # Return empty string if not non-TLS AND looking up $host in passwd-file
+  # yields a non-empty string; fail otherwise.
+  client_send = "<; ${if and{\
+                          {!eq{$tls_out_cipher}{}}\
+                          {!eq{PASSWDLINE}{}}\
+                         }\
+                      {}fail}\
+                 ; ${extract{1}{::}{PASSWDLINE}}\
+		 ; ${sg{PASSWDLINE}{\\N([^:]+:)(.*)\\N}{\\$2}}"
+.else
+  # Return empty string if looking up $host in passwd-file yields a
+  # non-empty string; fail otherwise.
+  client_send = "<; ${if !eq{PASSWDLINE}{}\
+                      {}fail}\
+                 ; ${extract{1}{::}{PASSWDLINE}}\
+		 ; ${sg{PASSWDLINE}{\\N([^:]+:)(.*)\\N}{\\$2}}"
+.endif
+
+# Change the Exim-standard login of per-smarthost to instead have a login
+# per Envelope-From (i.e. sender-address-domain) and not be keyed by the
+# remote host at all. So long as routing is correct, this will not leak
+# credentials:
+login_mailgun:
+  driver = plaintext
+  public_name = LOGIN
+  client_send = : ${extract{user} {${lookup{$sender_address_domain}lsearch{/etc/exim4/passwd.smarthosts}}}}: ${extract{pass}{${lookup{$sender_address_domain}lsearch{/etc/exim4/passwd.smarthosts}}}}
+

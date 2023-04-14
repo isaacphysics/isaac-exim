@@ -80,8 +80,8 @@ smarthost_mailgun:
   transport = remote_smtp_smarthost_mailgun
 # Conditionally use smarthost based on either the From address (h_From),
 # or the Envelope From address (sender_address_domain)
-#  condition = ${if match_domain{${domain:$h_From:}}{mail.isaacphysics.org:mail.isaaccomputerscience.org:mail.isaacscience.org}{yes}{no}}
-  condition = ${if match_domain{$sender_address_domain}{mail.isaacphysics.org:mail.isaaccomputerscience.org:mail.adacomputerscience.org:mail.isaacscience.org}{yes}{no}}
+#  condition = ${if match_domain{${domain:$h_From:}}{mail.isaacphysics.org:mail.adacomputerscience.org:mail.isaacscience.org}{yes}{no}}
+  condition = ${if match_domain{$sender_address_domain}{mail.isaacphysics.org:mail.adacomputerscience.org:mail.isaacscience.org}{yes}{no}}
   route_list = * smtp.eu.mailgun.org::587 byname
   host_find_failed = ignore
   same_domain_copy_routing = yes
